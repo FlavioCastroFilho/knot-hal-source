@@ -106,7 +106,7 @@ static gboolean knotd_io_watch(GIOChannel *io, GIOCondition cond,
 
 static void generic_io_destroy(gpointer user_data)
 {
-	struct session *session = user_data;
+	/*struct session *session = user_data;
 	GIOChannel *thing_io;
 
 	thing_io = session->thing_io;
@@ -119,7 +119,7 @@ static void generic_io_destroy(gpointer user_data)
 	}
 
 	g_free(session);
-	printf("generic_io_destroy\n\r");
+	printf("generic_io_destroy\n\r");*/
 }
 
 static gboolean generic_io_watch(GIOChannel *io, GIOCondition cond,
@@ -249,6 +249,7 @@ static int unix_start(void)
 	}
 
 	printf("Unix server started\n\r");
+
 	io = g_io_channel_unix_new(sock);
 	g_io_channel_set_flags(io, G_IO_FLAG_NONBLOCK, NULL);
 
@@ -270,8 +271,7 @@ static int serial_start(const char *pathname)
 	struct session *session;
 	GIOCondition cond = G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL;
 	GIOChannel *io;
-	int virtualfd, realfd, knotdfd;
-
+	int virtualfd, realfd, knotdfd, err;
 
 	if (phy_serial.probe() < 0)
 		return -EIO;
@@ -292,6 +292,10 @@ static int serial_start(const char *pathname)
 	}
 
 	printf("Serial server started\n\r");
+
+	/* Set user id to nobody */
+	err = setuid(65534);
+	printf("Set user to nobody: %d\n", err);
 
 	/* Tracking thing connection & data */
 	io = g_io_channel_unix_new(realfd);
